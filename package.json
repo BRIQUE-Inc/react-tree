@@ -1,0 +1,23 @@
+{
+  "name": "@brique/react-tree",
+  "version": "0.1.0",
+  "description": "React.js tree component",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BRIQUE-Inc/react-tree.git"
+  },
+  "keywords": [
+    "react.js",
+    "tree"
+  ],
+  "author": "brique",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/BRIQUE-Inc/react-tree/issues"
+  },
+  "homepage": "https://github.com/BRIQUE-Inc/react-tree#readme"
+}
