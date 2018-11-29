@@ -1,9 +1,7 @@
-import React, { Component } from 'react';
+import Container from './components/1-atoms/container/container';
+import NodeItem from './components/1-atoms/node-item/node-item';
+import Tree from './components/2-molecules/tree/tree';
 
-class App extends Component {
-  render() {
-    return <div>Hello World</div>;
-  }
-}
+export { Container, NodeItem, Tree };
 
-export default App;
+export default Tree;
