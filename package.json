@@ -1,6 +1,6 @@
 {
   "name": "@brique/react-tree",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "React.js tree component",
   "main": "dist/index.js",
   "scripts": {
@@ -16,7 +16,10 @@
     "react.js",
     "tree"
   ],
-  "author": "brique",
+  "author": {
+    "name": "brique",
+    "email": "info@brique.co.kr"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/BRIQUE-Inc/react-tree/issues"
