@@ -3,6 +3,10 @@ import PropTypes from 'prop-types';
 import Container from '../../1-atoms/container/container';
 import NodeItem from '../../1-atoms/node-item/node-item';
 
+/* ======= Components ======= */
+
+/* === Sub === */
+
 const RecursiveNode = ({
   list,
   openIds,
@@ -39,6 +43,8 @@ const RecursiveNode = ({
     </Fragment>
   );
 };
+
+/* === Main === */
 
 const Tree = ({
   list,

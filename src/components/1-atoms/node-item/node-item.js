@@ -1,6 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+/* ======= Components ======= */
+
+/* === Main === */
+
 const NodeItem = ({ depth, children }) => (
   <div>
     <span style={{ paddingLeft: `${depth * 10}px` }}>{children}</span>
