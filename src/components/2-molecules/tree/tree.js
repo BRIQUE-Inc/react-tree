@@ -1,77 +1,128 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
+
+import { L, takeAll, go, reduce } from '../../../assets/js/functionals';
+
 import Container from '../../1-atoms/container/container';
 import NodeItem from '../../1-atoms/node-item/node-item';
 
-const RecursiveNode = ({
+/* ======= Functions ======= */
+
+/* === Helper === */
+
+/**
+ * @function findChildren
+ * @param {array} list
+ * @param {function} checkOpen return true or false
+ * @param {string} idKey
+ * @param {string} parentKey
+ * @param {string} leafKey
+ * @param {string} parentNode
+ * @param {number} depth
+ * @return {generator} [node, depth]
+ */
+export const findChildren = function*(
   list,
-  openIds,
-  node,
+  checkOpen,
+  idKey,
+  parentKey,
+  leafKey,
+  parentNode,
   depth,
+) {
+  if (parentNode[leafKey]) return;
+
+  if (!checkOpen(parentNode)) return;
+
+  const children = L.filter(
+    node => node[parentKey] === parentNode[idKey],
+    list,
+  );
+
+  for (const child of children) {
+    yield [child, depth];
+    yield* findChildren(
+      list,
+      checkOpen,
+      idKey,
+      parentKey,
+      leafKey,
+      child,
+      depth + 1,
+    );
+  }
+};
+
+/**
+ * @function makeTree
+ * @param {array} list
+ * @param {function} checkOpen return true or false
+ * @param {string} idKey
+ * @param {string} parentKey
+ * @param {string} rootKey
+ * @param {string} leafKey
+ * @return {generator} [node, depth]
+ */
+export const makeTree = function*(
+  list,
+  checkOpen,
   idKey,
   parentKey,
   rootKey,
   leafKey,
-  renderNode,
-}) => {
-  const children = node[leafKey]
-    ? []
-    : list.filter(_node => _node[parentKey] === node[idKey]);
-  const isOpen = openIds.includes(node[idKey]);
-  return (
-    <Fragment>
-      {renderNode(node, depth)}
-      {isOpen &&
-        children.map(child => (
-          <RecursiveNode
-            key={child[idKey]}
-            list={list}
-            openIds={openIds}
-            node={child}
-            depth={depth + 1}
-            idKey={idKey}
-            parentKey={parentKey}
-            rootKey={rootKey}
-            leafKey={leafKey}
-            renderNode={renderNode}
-          />
-        ))}
-    </Fragment>
-  );
+) {
+  const roots = L.filter(node => node[rootKey], list);
+
+  for (const root of roots) {
+    yield [root, 0];
+
+    yield* findChildren(list, checkOpen, idKey, parentKey, leafKey, root, 1);
+  }
 };
+
+/* ======= Components ======= */
+
+/* === Main === */
 
 const Tree = ({
   list,
-  openIds: _openIds,
+  openIds,
   idKey,
   parentKey,
   rootKey,
   leafKey,
+  openKey,
   renderContainer,
   renderNode,
 }) => {
-  const roots = list.filter(node => node[rootKey]);
-  const openIds = Array.isArray(_openIds)
-    ? _openIds
-    : list.map(node => node[idKey]);
-  return renderContainer(
-    <Fragment>
-      {roots.map(node => (
-        <RecursiveNode
-          key={node[idKey]}
-          list={list}
-          openIds={openIds}
-          node={node}
-          depth={0}
-          idKey={idKey}
-          parentKey={parentKey}
-          rootKey={rootKey}
-          leafKey={leafKey}
-          renderNode={renderNode}
-        />
-      ))}
-    </Fragment>,
+  const opensById =
+    openKey == null &&
+    Array.isArray(openIds) &&
+    reduce(
+      (acc, id) => {
+        acc[id] = true;
+        return acc;
+      },
+      {},
+      openIds,
+    );
+
+  const checkOpen =
+    openKey != null
+      ? node => node[openKey]
+      : openIds == null
+        ? () => true
+        : Array.isArray(openIds)
+          ? node => opensById[node[idKey]]
+          : node => openIds[node[idKey]];
+
+  const nodes = go(
+    makeTree(list, checkOpen, idKey, parentKey, rootKey, leafKey),
+    L.map(([node, depth]) => renderNode(node, depth, idKey)),
+    takeAll,
   );
+
+  return renderContainer(nodes);
 };
 
 Tree.defaultProps = {
@@ -81,19 +132,26 @@ Tree.defaultProps = {
   parentKey: 'parent',
   rootKey: 'root',
   leafKey: 'leaf',
+  openKey: null,
   renderContainer: children => <Container>{children}</Container>,
-  renderNode: (node, depth) => (
-    <NodeItem depth={depth}>{node.display}</NodeItem>
+  renderNode: (node, depth, idKey) => (
+    <NodeItem key={node[idKey]} depth={depth}>
+      {node.display}
+    </NodeItem>
   ),
 };
 
 Tree.propTypes = {
   list: PropTypes.arrayOf(PropTypes.object),
-  openIds: PropTypes.array,
+  openIds: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.objectOf(PropTypes.bool),
+  ]),
   idKey: PropTypes.string,
   parentKey: PropTypes.string,
   rootKey: PropTypes.string,
   leafKey: PropTypes.string,
+  openKey: PropTypes.string,
   renderContainer: PropTypes.func,
   renderNode: PropTypes.func,
 };
